@@ -20,4 +20,9 @@ class TestHtmlNode(unittest.TestCase):
     def test_props_to_html(self):
         node = HTMLNode(props = {"href": "https://google.com"})
         self.assertEqual(" href=\"https://google.com\"", node.props_to_html())
+        node2 = HTMLNode()
+        self.assertEqual("", node2.props_to_html())
+
+if __name__ == "__main__":
+    unittest.main()
 
