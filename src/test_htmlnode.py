@@ -25,6 +25,11 @@ class TestHtmlNode(unittest.TestCase):
         node2 = HTMLNode()
         self.assertEqual("", node2.props_to_html())
 
+    def test_eq(self):
+        node1 = HTMLNode("h1", "This is a htmlnode")
+        node2 = HTMLNode("h1", "This is a htmlnode")
+        self.assertEqual(node1, node2)
+
 class TestLeafNode(unittest.TestCase):
     def test_repr(self):
         leaf_node = LeafNode("h1", "This is a leaf node")
