@@ -24,7 +24,7 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     ret = []
     for node in old_nodes:
         if node.text_type != TextType.NORMAL:
-            ret.append(old_node)
+            ret.append(node)
             continue
         string_split = re.split(delimiter, node.text)
         if len(string_split) % 2 == 0:
@@ -40,6 +40,55 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             else:
                 ret.append(TextNode(string, text_type))
                 new_type = False
+    return ret
+
+def extract_markdown_images(text):
+    return re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+
+def extract_markdown_links(text):
+    return re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+
+def split_nodes_link(old_nodes):
+    ret = []
+    for node in old_nodes:
+        if node.text_type != TextType.NORMAL:
+            ret.append(node)
+            continue
+        links = extract_markdown_links(node.text)
+        if len(links) == 0:
+            ret.append(node)
+            continue
+        text = node.text
+        for link in links:
+            sections = text.split(f"[{link[0]}]({link[1]})", 1)
+            if sections[0] != "":
+                ret.append(TextNode(sections[0], TextType.NORMAL))
+            ret.append(TextNode(link[0], TextType.LINKS, link[1]))
+            text = sections[1]
+        if text != "":
+            ret.append(TextNode(sections[1], TextType.NORMAL))
+    return ret
+
+def split_nodes_image(old_nodes):
+    ret = []
+    for node in old_nodes:
+        if node.text_type != TextType.NORMAL:
+            ret.append(node)
+            continue
+        links = extract_markdown_images(node.text)
+        if len(links) == 0:
+            ret.append(node)
+            continue
+        text = node.text
+        for link in links:
+            print(link)
+            sections = text.split(f"![{link[0]}]({link[1]})", 1)
+            if sections[0] != "":
+                ret.append(TextNode(sections[0], TextType.NORMAL))
+            ret.append(TextNode(link[0], TextType.IMAGES, link[1]))
+            text = sections[1]
+        if text != "":
+            ret.append(TextNode(sections[1], TextType.NORMAL))
     return ret
 
 
