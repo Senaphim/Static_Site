@@ -61,6 +61,8 @@ def split_nodes_link(old_nodes):
         text = node.text
         for link in links:
             sections = text.split(f"[{link[0]}]({link[1]})", 1)
+            if len(sections) != 2:
+                raise ValueError("Invalid markdown, link section not closed")
             if sections[0] != "":
                 ret.append(TextNode(sections[0], TextType.NORMAL))
             ret.append(TextNode(link[0], TextType.LINKS, link[1]))
@@ -81,8 +83,9 @@ def split_nodes_image(old_nodes):
             continue
         text = node.text
         for link in links:
-            print(link)
             sections = text.split(f"![{link[0]}]({link[1]})", 1)
+            if len(sections) != 2:
+                raise ValueError("Invalid markdown, image section not closed")
             if sections[0] != "":
                 ret.append(TextNode(sections[0], TextType.NORMAL))
             ret.append(TextNode(link[0], TextType.IMAGES, link[1]))
@@ -91,6 +94,15 @@ def split_nodes_image(old_nodes):
             ret.append(TextNode(sections[1], TextType.NORMAL))
     return ret
 
+def text_to_textnodes(text):
+    textnode = TextNode(text, TextType.NORMAL)
+    ret = [textnode]
+    ret = split_nodes_image(ret)
+    ret = split_nodes_link(ret)
+    ret = split_nodes_delimiter(ret, r"\*\*", TextType.BOLD)
+    ret = split_nodes_delimiter(ret, r"\*", TextType.ITALIC)
+    ret = split_nodes_delimiter(ret, r"`", TextType.CODE)
+    return ret
 
 def main():
     text_node = TextNode("This is a textnode", TextType.NORMAL, "https://www.boot.dev")

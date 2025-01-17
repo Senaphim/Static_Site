@@ -3,8 +3,11 @@ import unittest
 from htmlnode import ParentNode, LeafNode
 from textnode import TextNode, TextType
 from main import text_node_to_html_node, split_nodes_delimiter
-from main import extract_markdown_images, extract_markdown_links
-from main import split_nodes_link, split_nodes_image
+from main import (extract_markdown_images,
+        extract_markdown_links,
+        split_nodes_link,
+        split_nodes_image,
+        text_to_textnodes)
 
 
 class testToHTML(unittest.TestCase):
@@ -110,6 +113,22 @@ class testExtractFunctions(unittest.TestCase):
             ],
             matches,
         )
+
+class testTextToTextnode(unittest.TestCase):
+    def test_all_nodetypes(self):
+        text = r"This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        split_nodes = [TextNode("This is ", TextType.NORMAL),
+                       TextNode("text", TextType.BOLD),
+                       TextNode(" with an ", TextType.NORMAL),
+                       TextNode("italic", TextType.ITALIC),
+                       TextNode(" word and a ", TextType.NORMAL),
+                       TextNode("code block", TextType.CODE),
+                       TextNode(" and an ", TextType.NORMAL),
+                       TextNode("obi wan image", TextType.IMAGES,
+                                "https://i.imgur.com/fJRm4Vk.jpeg"),
+                       TextNode(" and a ", TextType.NORMAL),
+                       TextNode("link", TextType.LINKS, "https://boot.dev"),]
+        self.assertEqual(split_nodes, text_to_textnodes(text))
 
 if __name__ == "__main__":
     unittest.main()
