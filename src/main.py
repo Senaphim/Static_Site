@@ -105,31 +105,31 @@ def text_to_textnodes(text):
     return ret
 
 def markdown_to_blocks(markdown):
-    markdown_n = markdown + "\n\n"
-    line_split = markdown_n.splitlines()
+    line_split = markdown.split("\n\n")
     final_lines = []
-    i = 0
-    while i < (len(line_split)):
-        line = line_split[i]
-        line = line.strip()
+    for line in line_split:
         if line == "":
-            i = i + 1
             continue
-        if line[0] == r"*":
-            j = i + 1 
-            while j < len(line_split):
-                if line_split[j].strip() == "":
-                    i = j
-                    break
-                if line_split[j][0] == r"*":
-                    line += "\n" + line_split[j].strip()
-                else:
-                    i = j
-                    break
-                j += 1
+        line = line.strip()
         final_lines.append(line)
-        i += 1
     return final_lines
+
+def block_to_block_type(block):
+    if len(re.findall(r"#{1,6} ", block)) != 0:
+        return "HEADING"
+    if len(re.findall(r"```", block)) != 0:
+        if len(re.findall(r"```", block)) == 1:
+            raise ValueError("Invalid markdown, code block not closed")
+        return "CODE"
+    if len(re.findall(r">", block)) == len(block.splitlines()):
+        return "QUOTE"
+    if (len(re.findall(r"\*", block)) == len(block.splitlines()) or
+            len(re.findall(r"-", block)) == len(block.splitlines())):
+        return "UNORDERED LIST"
+    if len(re.findall(r"[1-9]{1,2}. ", block)) == len(block.splitlines()):
+        return "ORDERED LIST"
+    else:
+        return "PARAGRAPH"
 
 def main():
     text_node = TextNode("This is a textnode", TextType.NORMAL, "https://www.boot.dev")

@@ -9,7 +9,8 @@ from main import (text_node_to_html_node,
         split_nodes_link,
         split_nodes_image,
         text_to_textnodes,
-        markdown_to_blocks)
+        markdown_to_blocks,
+        block_to_block_type)
 
 
 class testTextNodeToHTML(unittest.TestCase):
@@ -139,7 +140,7 @@ class testMarkdownToBlocks(unittest.TestCase):
         self.assertEqual(blocks, markdown_to_blocks(markdown))
 
     def test_multiple_rawtext(self):
-        markdown = "This is paragraph 1\nThis is paragraph 2\n\nThis is paragraph 3"
+        markdown = "This is paragraph 1\n\nThis is paragraph 2\n\n\nThis is paragraph 3"
         blocks = ["This is paragraph 1",
                   "This is paragraph 2",
                   "This is paragraph 3"]
@@ -157,6 +158,21 @@ class testMarkdownToBlocks(unittest.TestCase):
                   "* This is the first list item in a list block\n* This is a list item\n* This is another list item"]
         self.assertEqual(blocks, markdown_to_blocks(markdown))
 
+class testBlockToBlockType(unittest.TestCase):
+    def test_heading(self):
+        block = "##### This is a heading"
+        block_type = "HEADING"
+        self.assertEqual(block_type, block_to_block_type(block))
+
+    def test_unordered_list(self):
+        block = "- This is an unordered list\n- This is line 2\n- This is line 3"
+        block_type = "UNORDERED LIST"
+        self.assertEqual(block_type, block_to_block_type(block))
+
+    def test_ordered_list(self):
+        block = "1. This is an ordered list\n2. This is item 2\n3. This is item 3"
+        block_type = "ORDERED LIST"
+        self.assertEqual(block_type, block_to_block_type(block))
 
 if __name__ == "__main__":
     unittest.main()
