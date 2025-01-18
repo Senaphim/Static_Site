@@ -2,15 +2,17 @@ import unittest
 
 from htmlnode import ParentNode, LeafNode
 from textnode import TextNode, TextType
-from main import text_node_to_html_node, split_nodes_delimiter
-from main import (extract_markdown_images,
+from main import (text_node_to_html_node,
+        split_nodes_delimiter,
+        extract_markdown_images,
         extract_markdown_links,
         split_nodes_link,
         split_nodes_image,
-        text_to_textnodes)
+        text_to_textnodes,
+        markdown_to_blocks)
 
 
-class testToHTML(unittest.TestCase):
+class testTextNodeToHTML(unittest.TestCase):
     def test_text(self):
         textnode = TextNode("This is a test node", TextType.NORMAL)
         leafnode = LeafNode(None, "This is a test node")
@@ -129,6 +131,32 @@ class testTextToTextnode(unittest.TestCase):
                        TextNode(" and a ", TextType.NORMAL),
                        TextNode("link", TextType.LINKS, "https://boot.dev"),]
         self.assertEqual(split_nodes, text_to_textnodes(text))
+
+class testMarkdownToBlocks(unittest.TestCase):
+    def test_heading(self):
+        markdown = "# This is a heading"
+        blocks = ["# This is a heading"]
+        self.assertEqual(blocks, markdown_to_blocks(markdown))
+
+    def test_multiple_rawtext(self):
+        markdown = "This is paragraph 1\nThis is paragraph 2\n\nThis is paragraph 3"
+        blocks = ["This is paragraph 1",
+                  "This is paragraph 2",
+                  "This is paragraph 3"]
+        self.assertEqual(blocks, markdown_to_blocks(markdown))
+
+    def test_list(self):
+        markdown = "* This is list item 1\n* This is list item 2\n* This is list item 3"
+        blocks = ["* This is list item 1\n* This is list item 2\n* This is list item 3"]
+        self.assertEqual(blocks, markdown_to_blocks(markdown))
+
+    def test_combination(self):
+        markdown = "# This is a heading\n\nThis is a paragraph of text. It has some **bold** and *italic* words inside of it.\n\n* This is the first list item in a list block\n* This is a list item\n* This is another list item"
+        blocks = ["# This is a heading",
+                  "This is a paragraph of text. It has some **bold** and *italic* words inside of it.",
+                  "* This is the first list item in a list block\n* This is a list item\n* This is another list item"]
+        self.assertEqual(blocks, markdown_to_blocks(markdown))
+
 
 if __name__ == "__main__":
     unittest.main()

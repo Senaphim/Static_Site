@@ -104,6 +104,33 @@ def text_to_textnodes(text):
     ret = split_nodes_delimiter(ret, r"`", TextType.CODE)
     return ret
 
+def markdown_to_blocks(markdown):
+    markdown_n = markdown + "\n\n"
+    line_split = markdown_n.splitlines()
+    final_lines = []
+    i = 0
+    while i < (len(line_split)):
+        line = line_split[i]
+        line = line.strip()
+        if line == "":
+            i = i + 1
+            continue
+        if line[0] == r"*":
+            j = i + 1 
+            while j < len(line_split):
+                if line_split[j].strip() == "":
+                    i = j
+                    break
+                if line_split[j][0] == r"*":
+                    line += "\n" + line_split[j].strip()
+                else:
+                    i = j
+                    break
+                j += 1
+        final_lines.append(line)
+        i += 1
+    return final_lines
+
 def main():
     text_node = TextNode("This is a textnode", TextType.NORMAL, "https://www.boot.dev")
 
