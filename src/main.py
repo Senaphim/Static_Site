@@ -115,22 +115,115 @@ def markdown_to_blocks(markdown):
     return final_lines
 
 def block_to_block_type(block):
-    if len(re.findall(r"#{1,6} ", block)) != 0:
+    if len(re.findall(r"^#{1,6} ", block)) != 0:
         return "HEADING"
     if len(re.findall(r"```", block)) != 0:
         if len(re.findall(r"```", block)) == 1:
             raise ValueError("Invalid markdown, code block not closed")
         return "CODE"
-    if len(re.findall(r">", block)) == len(block.splitlines()):
+    if len(re.findall(r"^>", block, re.M)) == len(block.splitlines()):
         return "QUOTE"
-    if (len(re.findall(r"\*", block)) == len(block.splitlines()) or
-            len(re.findall(r"-", block)) == len(block.splitlines())):
+    if (len(re.findall(r"^\* ", block, re.M)) == len(block.splitlines()) or
+            len(re.findall(r"^- ", block, re.M)) == len(block.splitlines())):
         return "UNORDERED LIST"
-    if len(re.findall(r"[1-9]{1,2}. ", block)) == len(block.splitlines()):
+    if len(re.findall(r"^[1-9]{1,2}. ", block, re.M)) == len(block.splitlines()):
         return "ORDERED LIST"
     else:
         return "PARAGRAPH"
 
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    html_nodes = []
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        match block_type:
+            case "HEADING":
+                html_nodes.append(heading_block_to_html(block))
+            case "CODE":
+                html_nodes.append(code_block_to_html(block))
+            case "QUOTE":
+                html_nodes.append(quote_block_to_html(block))
+            case "UNORDERED LIST":
+                html_nodes.append(UL_block_to_html(block))
+            case "ORDERED LIST":
+                html_nodes.append(OL_block_to_html(block))
+            case "PARAGRAPH":
+                html_nodes.append(paragraph_block_to_html(block))
+            case _:
+                raise ValueError("Invalid markdown type")
+    return_node = ParentNode("div", html_nodes)
+    return return_node 
+                
+def heading_block_to_html(block):
+    html_nodes = []
+    heading_lead = re.findall(r"^#{1,6}", block)
+    heading_level = len(heading_lead[0])
+    text_nodes = text_to_textnodes(block[heading_level + 1:])
+    for text_node in text_nodes:
+        converted_node = text_node_to_html_node(text_node)
+        html_nodes.append(converted_node)
+    return_node = ParentNode(f"h{heading_level}", html_nodes)
+    return return_node
+
+def code_block_to_html(block):
+    html_nodes = []
+    text_nodes = text_to_textnodes(block.strip("`\n"))
+    for text_node in text_nodes:
+        converted_node = text_node_to_html_node(text_node)
+        html_nodes.append(converted_node)
+    return_node = ParentNode("pre", [ParentNode("code", html_nodes)])
+    return return_node
+
+def quote_block_to_html(block):
+    line_split = block.splitlines()
+    strip_chevron = []
+    for line in line_split:
+        strip_chevron.append(line.strip("> "))
+    sep = "\n"
+    raw_text = sep.join(strip_chevron)
+    html_nodes = []
+    text_nodes = text_to_textnodes(raw_text)
+    for text_node in text_nodes:
+        converted_node = text_node_to_html_node(text_node)
+        html_nodes.append(converted_node)
+    return_node = ParentNode("blockquote", html_nodes)
+    return return_node
+
+def UL_block_to_html(block):
+    line_split = block.splitlines()
+    list_nodes = []
+    for line in line_split:
+        html_nodes = []
+        text_nodes = text_to_textnodes(line.strip("- "))
+        for text_node in text_nodes:
+            converted_node = text_node_to_html_node(text_node)
+            html_nodes.append(converted_node)
+        list_nodes.append(ParentNode("li", html_nodes))
+    return_node = ParentNode("ul", list_nodes)
+    return return_node
+
+def OL_block_to_html(block):
+    line_split = block.splitlines()
+    list_nodes = []
+    for line in line_split:
+        html_nodes = []
+        text_nodes = text_to_textnodes(line.strip("1234567890 ."))
+        for text_node in text_nodes:
+            converted_node = text_node_to_html_node(text_node)
+            html_nodes.append(converted_node)
+        list_nodes.append(ParentNode("li", html_nodes))
+    return_node = ParentNode("ol", list_nodes)
+    return return_node
+
+def paragraph_block_to_html(block):
+    html_nodes = []
+    text_nodes = text_to_textnodes(block)
+    for text_node in text_nodes:
+        converted_node = text_node_to_html_node(text_node)
+        html_nodes.append(converted_node)
+    return_node = ParentNode("p", html_nodes)
+    return return_node
+    
 def main():
     text_node = TextNode("This is a textnode", TextType.NORMAL, "https://www.boot.dev")
 

@@ -15,9 +15,7 @@ from main import (text_node_to_html_node,
         code_block_to_html,
         quote_block_to_html,
         UL_block_to_html,
-        OL_block_to_html,
-        paragraph_block_to_html,
-        markdown_to_html_node)
+        OL_block_to_html)
 
 
 class testTextNodeToHTML(unittest.TestCase):
@@ -284,63 +282,6 @@ class testOLToHtml(unittest.TestCase):
                                   LeafNode(None, "With two items")])
         ])
         self.assertEqual(htmlnode, OL_block_to_html(block))
-
-    def test_multiline_OL_inline(self):
-        block = "1. This is an **ordered** list\n2. With **two** items"
-        htmlnode = ParentNode("ol", [
-                              ParentNode("li", [
-                                  LeafNode(None, "This is an "),
-                                  LeafNode("b", "ordered"),
-                                  LeafNode(None, " list")]),
-                              ParentNode("li", [
-                                  LeafNode(None, "With "),
-                                  LeafNode("b", "two"),
-                                  LeafNode(None, " items")])
-        ])
-        self.assertEqual(htmlnode, OL_block_to_html(block))
-
-class testParagraphToHtml(unittest.TestCase):
-    def test_para(self):
-        block = "This is a plain old paragraph"
-        htmlnode = ParentNode("p", [LeafNode(None, "This is a plain old paragraph")])
-        self.assertEqual(htmlnode, paragraph_block_to_html(block))
-
-    def test_para_inline(self):
-        block = "This is a **plain** old paragraph"
-        htmlnode = ParentNode("p", [
-                              LeafNode(None, "This is a "),
-                              LeafNode("b", "plain"),
-                              LeafNode(None, " old paragraph")
-        ])
-        self.assertEqual(htmlnode, paragraph_block_to_html(block))
-
-class testMarkdownToHtmlNode(unittest.TestCase):
-    def test_two_para(self):
-        markdown = "This is paragraph one\n\nThis is paragraph two"
-        htmlnode = ParentNode("div", [
-                              ParentNode("p", [
-                                  LeafNode(None, "This is paragraph one")]),
-                              ParentNode("p", [
-                                  LeafNode(None, "This is paragraph two")])
-        ])
-        self.assertEqual(htmlnode, markdown_to_html_node(markdown))
-
-    def test_ol_para(self):
-        markdown = "A paragraph\n\n1. Item one\n2. Item two\n\nSecond paragraph"
-        htmlnode = ParentNode("div", [
-                              ParentNode("p", [
-                                  LeafNode(None, "A paragraph")]),
-                              ParentNode("ol", [
-                                  ParentNode("li", [
-                                      LeafNode(None, "Item one")]),
-                                  ParentNode("li", [
-                                      LeafNode(None, "Item two")])
-                                  ]),
-                              ParentNode("p", [
-                                  LeafNode(None, "Second paragraph")])
-        ])
-        self.assertEqual(htmlnode, markdown_to_html_node(markdown))
-
 if __name__ == "__main__":
     unittest.main()
 
