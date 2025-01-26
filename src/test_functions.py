@@ -17,7 +17,8 @@ from markdown_blocks import (text_node_to_html_node,
         UL_block_to_html,
         OL_block_to_html,
         paragraph_block_to_html,
-        markdown_to_html_node)
+        markdown_to_html_node,
+        extract_title)
 
 
 class testTextNodeToHTML(unittest.TestCase):
@@ -340,6 +341,22 @@ class testMarkdownToHtmlNode(unittest.TestCase):
                                   LeafNode(None, "Second paragraph")])
         ])
         self.assertEqual(htmlnode, markdown_to_html_node(markdown))
+
+class testExtractHeader(unittest.TestCase):
+    def test_header_extract(self):
+        markdown = "# This is h1"
+        string = "This is h1"
+        self.assertEqual(string, extract_title(markdown))
+
+    def test_header_multiline(self):
+        markdown = "# This is h1\n\nThis is a paragraph"
+        string = "This is h1"
+        self.assertEqual(string, extract_title(markdown))
+
+    def test_header_multiples(self):
+        markdown = "# This is h1\n\n## This is h2"
+        string = "This is h1"
+        self.assertEqual(string, extract_title(markdown))
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,9 @@
 import os
 import shutil
 
+from markdown_blocks import (markdown_to_html_node,
+    extract_title)
+
 def cp_static_to_public():
     rm_public()
     path_list = os.listdir("./static")
@@ -20,16 +23,37 @@ def recursive_cp(path):
     static_path = os.path.join("./static", path)
     public_path = os.path.join("./public", path)
     if os.path.isfile(static_path):
+        print(f"Copying from {static_path} to {public_path}")
         shutil.copy(static_path, public_path)
     else:
         if not os.path.exists(public_path):
+            print(f"Making directory {public_path}")
             os.mkdir(public_path)
         path_list = os.listdir(static_path)
         for child_path in path_list:
             recursive_cp(os.path.join(path, child_path))
 
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    with open(from_path) as markdown_file:
+        markdown = markdown_file.read()
+    with open(template_path) as template_file:
+        template = template_file.read()
+    html_node = markdown_to_html_node(markdown)
+    html = html_node.to_html()
+    title = extract_title(markdown)
+    template = template.replace("{{ Title }}", title)
+    template = template.replace("{{ Content }}", html)
+    dest_dir = os.path.dirname(dest_path)
+    if not os.path.exists(dest_dir):
+        os.mkdirs(dest_dir)
+    with open(dest_path, mode = "w") as html_file:
+        html_file.write(template)
+
+
 def main():
     cp_static_to_public()
+    generate_page("./content/index.md", "./template.html", "./public/index.html")
 
 main()
 

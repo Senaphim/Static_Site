@@ -178,7 +178,7 @@ def quote_block_to_html(block):
     line_split = block.splitlines()
     strip_chevron = []
     for line in line_split:
-        strip_chevron.append(line.strip("> "))
+        strip_chevron.append(line.lstrip("> "))
     sep = "\n"
     raw_text = sep.join(strip_chevron)
     html_nodes = []
@@ -194,7 +194,7 @@ def UL_block_to_html(block):
     list_nodes = []
     for line in line_split:
         html_nodes = []
-        text_nodes = text_to_textnodes(line.strip("- "))
+        text_nodes = text_to_textnodes(line.lstrip("*- "))
         for text_node in text_nodes:
             converted_node = text_node_to_html_node(text_node)
             html_nodes.append(converted_node)
@@ -207,7 +207,7 @@ def OL_block_to_html(block):
     list_nodes = []
     for line in line_split:
         html_nodes = []
-        text_nodes = text_to_textnodes(line.strip("1234567890 ."))
+        text_nodes = text_to_textnodes(line.lstrip("1234567890 ."))
         for text_node in text_nodes:
             converted_node = text_node_to_html_node(text_node)
             html_nodes.append(converted_node)
@@ -224,3 +224,8 @@ def paragraph_block_to_html(block):
     return_node = ParentNode("p", html_nodes)
     return return_node
 
+def extract_title(markdown):
+    header = re.findall(r"^#{1} .+", markdown)
+    if len(header) == 0:
+        raise ValueError("Invalid markdown, no title provided")
+    return header[0].lstrip("# ")
