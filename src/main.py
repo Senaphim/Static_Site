@@ -45,15 +45,25 @@ def generate_page(from_path, template_path, dest_path):
     template = template.replace("{{ Title }}", title)
     template = template.replace("{{ Content }}", html)
     dest_dir = os.path.dirname(dest_path)
+    dest_path = dest_path.replace(".md", ".html")
     if not os.path.exists(dest_dir):
-        os.mkdirs(dest_dir)
+        os.makedirs(dest_dir)
     with open(dest_path, mode = "w") as html_file:
         html_file.write(template)
 
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    if os.path.isfile(dir_path_content):
+        generate_page(dir_path_content, template_path, dest_dir_path)
+    else:
+        path_list = os.listdir(dir_path_content)
+        for child_path in path_list:
+            full_child_path = os.path.join(dir_path_content, child_path)
+            full_dest_path = os.path.join(dest_dir_path, child_path)
+            generate_pages_recursive(full_child_path, template_path, full_dest_path)
 
 def main():
     cp_static_to_public()
-    generate_page("./content/index.md", "./template.html", "./public/index.html")
+    generate_pages_recursive("./content", "./template.html", "./public")
 
 main()
 

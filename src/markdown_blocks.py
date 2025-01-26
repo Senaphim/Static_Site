@@ -194,7 +194,7 @@ def UL_block_to_html(block):
     list_nodes = []
     for line in line_split:
         html_nodes = []
-        text_nodes = text_to_textnodes(line.lstrip("*- "))
+        text_nodes = text_to_textnodes(line.lstrip("*-").lstrip())
         for text_node in text_nodes:
             converted_node = text_node_to_html_node(text_node)
             html_nodes.append(converted_node)

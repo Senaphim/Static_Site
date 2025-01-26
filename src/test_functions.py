@@ -141,6 +141,13 @@ class testTextToTextnode(unittest.TestCase):
                        TextNode("link", TextType.LINKS, "https://boot.dev"),]
         self.assertEqual(split_nodes, text_to_textnodes(text))
 
+    def test_text_bold_leading(self):
+        text = r"**This** is text with bold at the beginning"
+        split_nodes = [TextNode("This", TextType.BOLD),
+                       TextNode(" is text with bold at the beginning", TextType.NORMAL)
+                       ]
+        self.assertEqual(split_nodes, text_to_textnodes(text))
+
 class testMarkdownToBlocks(unittest.TestCase):
     def test_heading(self):
         markdown = "# This is a heading"
@@ -265,6 +272,16 @@ class testULToHtml(unittest.TestCase):
                                   LeafNode(None, "With "),
                                   LeafNode("b", "two"),
                                   LeafNode(None, " items")])
+        ])
+        self.assertEqual(htmlnode, UL_block_to_html(block))
+
+    def test_UL_inline_beginning(self):
+        block = "- **This** is an unordered list"
+        htmlnode = ParentNode("ul", [
+                              ParentNode("li", [
+                                  LeafNode("b", "This"),
+                                  LeafNode(None, " is an unordered list")
+                              ])
         ])
         self.assertEqual(htmlnode, UL_block_to_html(block))
 
